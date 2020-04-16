@@ -10,6 +10,19 @@ function Ball:init(x, y, width, height)
   self.dy = math.random(-50, 50) -- return random values between -50 and 50
 end
 
+-- deflects if collides with paddle
+function Ball:collides(paddle)
+  if self.x > paddle.x + paddle.width or self.x + self.width < paddle.x then
+    return false
+  end
+
+  if self.y > paddle.y + paddle.height or self.y + self.height < paddle.y then
+    return false
+  end
+
+  return true
+end
+
 function Ball:reset()
   self.x = VIRTUAL_WIDTH / 2 - 2
   self.y = VIRTUAL_HEIGHT / 2 - 2

@@ -15,6 +15,8 @@ function love.load()
   math.randomseed(os.time())
   love.graphics.setDefaultFilter('nearest', 'nearest') -- set 'Point' filtering for retro aesthetic
   
+  love.window.setTitle('Pong')
+
   -- set font
   smallFont = love.graphics.newFont('04B_03__.ttf', 8)
   scoreFont = love.graphics.newFont('04B_03__.ttf', 32)
@@ -42,40 +44,70 @@ end
 
 -- move player paddles when keys are pressed
 function love.update(dt)
-
-  paddle1:update(dt)
-  paddle2:update(dt)
-
-  if love.keyboard.isDown('w') then
-    paddle1.dy = -PADDLE_SPEED
-  elseif love.keyboard.isDown('s') then
-    paddle1.dy = PADDLE_SPEED
-  else
-    paddle1.dy = 0
-  end
-
-  if love.keyboard.isDown('up') then
-    paddle2.dy = -PADDLE_SPEED
-  elseif love.keyboard.isDown('down') then
-    paddle2.dy = PADDLE_SPEED
-  else
-    paddle2.dy = 0
-  end
-
   if gameState == 'play' then
+    
+    -- keep track of scores
+    if ball.x <= 0 then
+      playerTwoScore = playerTwoScore + 1
+      ball:reset()
+      gameState = 'start'
+    end 
+
+    if ball.x >= VIRTUAL_WIDTH - 4 then
+      playerOneScore = playerOneScore + 1
+      ball:reset()
+      gameState = 'start'
+    end
+
+    -- deflect ball if it hits either paddle
+    if ball:collides(paddle1) then
+      ball.dx = -ball.dx
+    end
+
+    if ball:collides(paddle2) then
+      ball.dx = -ball.dx
+    end
+
+    -- make sure ball does not go out of screen's vertical boundaries
+    if ball.y <= 0 then
+      ball.dy = -ball.dy
+      ball.y = 0
+    end
+
+    if ball.y >= VIRTUAL_HEIGHT - 4 then
+      ball.dy = -ball.dy
+      ball.y = VIRTUAL_HEIGHT - 4
+    end
+
+    if love.keyboard.isDown('w') then
+      paddle1.dy = -PADDLE_SPEED
+    elseif love.keyboard.isDown('s') then
+      paddle1.dy = PADDLE_SPEED
+    else
+      paddle1.dy = 0
+    end
+
+    if love.keyboard.isDown('up') then
+      paddle2.dy = -PADDLE_SPEED
+    elseif love.keyboard.isDown('down') then
+      paddle2.dy = PADDLE_SPEED
+    else
+      paddle2.dy = 0
+    end
+
     ball:update(dt)
+    paddle1:update(dt)
+    paddle2:update(dt)
   end
+  
 end
 
 function love.keypressed(key)
   if key == 'escape' then
     love.event.quit() -- allow user to quit game by pressing 'escape' key
-  elseif key == 'enter' or key == 'return' then
+  elseif key == 'enter' or key == 'return' then -- allow user to start game by pressing 'enter' or 'return'
     if gameState == 'start' then
       gameState = 'play'
-    elseif gameState == 'play' then
-      gameState = 'start'
-      ball:reset()
     end
   end
 end
@@ -112,5 +144,14 @@ function love.draw()
   paddle2:render()
   ball:render()
 
+  displayFPS()
+
   push:apply('end')
+end
+
+function displayFPS()
+  love.graphics.setColor(0, 1, 0, 1)
+  love.graphics.setFont(smallFont)
+  love.graphics.print('FPS: ' .. tostring(love.timer.getFPS()), 40, 20) -- concatenate two strings with '..'
+  love.graphics.setColor(1, 1, 1, 1)
 end
