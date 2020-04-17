@@ -29,6 +29,14 @@ function love.load()
   paddle1 = Paddle(5, 20, 5, 20)
   paddle2 = Paddle(VIRTUAL_WIDTH - 10, VIRTUAL_HEIGHT - 30, 5, 20)
   ball = Ball(VIRTUAL_WIDTH / 2 - 2, VIRTUAL_HEIGHT / 2 - 2, 4, 4)
+
+  -- send ball either left or right depending on whose turn it is to serve
+  servingPlayer = math.random(2) == 1 and 1 or 2
+  if servingPlayer == 1 then
+    ball.dx = 100
+  else
+    ball.dx = -100
+  end
  
   -- initialise speed at which paddle moves
   PADDLE_SPEED = 200
@@ -49,14 +57,18 @@ function love.update(dt)
     -- keep track of scores
     if ball.x <= 0 then
       playerTwoScore = playerTwoScore + 1
+      servingPlayer = 1
       ball:reset()
-      gameState = 'start'
+      ball.dx = 100
+      gameState = 'serve'
     end 
 
     if ball.x >= VIRTUAL_WIDTH - 4 then
       playerOneScore = playerOneScore + 1
+      servingPlayer = 2
       ball:reset()
-      gameState = 'start'
+      ball.dx = -100
+      gameState = 'serve'
     end
 
     -- deflect ball if it hits either paddle
@@ -107,6 +119,8 @@ function love.keypressed(key)
     love.event.quit() -- allow user to quit game by pressing 'escape' key
   elseif key == 'enter' or key == 'return' then -- allow user to start game by pressing 'enter' or 'return'
     if gameState == 'start' then
+      gameState = 'serve'
+    elseif gameState == 'serve' then
       gameState = 'play'
     end
   end
@@ -119,16 +133,16 @@ function love.draw()
   love.graphics.clear(40 / 255, 45 / 255, 52 / 255, 255 / 255) -- divide by 255 because function takes decimal values
 
   love.graphics.setFont(smallFont)
+
   if gameState == 'start' then -- show when game has not started
-    love.graphics.printf(
-      "start", -- text to render
-      0, -- starting X position; 0 since we centre the text based on width
-      20, -- starting Y position;
-      VIRTUAL_WIDTH, -- number of pixels to centre within entire screen
-      'center') -- alignment mode
+    love.graphics.printf("Welcome to Pong!", 0, 20, VIRTUAL_WIDTH, 'center')
+    love.graphics.printf("Press Enter to play!", 0, 32, VIRTUAL_WIDTH, 'center')
+  elseif gameState == 'serve' then
+    love.graphics.printf("Player " .. tostring(servingPlayer) .. "'s turn to serve!", 0, 20, VIRTUAL_WIDTH, 'center')
+    love.graphics.printf("Press Enter to start!", 0, 32, VIRTUAL_WIDTH, 'center')
   elseif gameState == 'play' then -- show when game is in play
     love.graphics.printf(
-      "play", -- text to render
+      "Here we go!", -- text to render
       0, -- starting X position; 0 since we centre the text based on width
       20, -- starting Y position;
       VIRTUAL_WIDTH, -- number of pixels to centre within entire screen
