@@ -56,8 +56,12 @@ function love.load()
   push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
     fullscreen = false,
     vsync = true,
-    resizable = false
+    resizable = true
   })
+end
+
+function love.resize(w, h) -- allow user to resize window
+  push:resize(w, h)
 end
 
 function love.update(dt)
@@ -146,6 +150,11 @@ function love.update(dt)
       paddle2.dy = PADDLE_SPEED
     else
       paddle2.dy = 0
+    end
+
+    -- allow user to play against player 2 (computer)
+    if ball.dx > 0 then 
+      paddle2.dy = ball.dy
     end
 
     ball:update(dt)
